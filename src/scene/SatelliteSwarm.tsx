@@ -92,6 +92,7 @@ export function SatelliteSwarm() {
 
   const issPos = useMemo(() => {
     if (!iss || !layers.iss) return null;
+    if (!iss.latitude || !iss.longitude) return null;
     const latRad = (iss.latitude * Math.PI) / 180;
     const lonRad = (iss.longitude * Math.PI) / 180;
     const r = (EARTH_RADIUS_KM + iss.altitudeKm) * SCALE;
