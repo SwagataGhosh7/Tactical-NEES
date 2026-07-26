@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import * as THREE from "three";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { useTacticalStore } from "@/state/useTacticalStore";
@@ -21,15 +21,24 @@ const issQueryOptions = queryOptions({
 });
 
 const EARTH_RADIUS_KM = 6371;
-const SCALE = 1 / 7000; // 1 unit ≈ 7000 km
+const SCALE = 1 / 7000;
+
+const GROUP_COLORS: Record<string, THREE.Color> = {
+  starlink: new THREE.Color("#ffb000"),
+  "gps-ops": new THREE.Color("#00e5ff"),
+  active: new THREE.Color("#a0a0a0"),
+  weather: new THREE.Color("#4ade80"),
+  science: new THREE.Color("#c084fc"),
+  stations: new THREE.Color("#ffffff"),
+};
 
 function propagateSimple(sat: TleDto, now: Date): THREE.Vector3 | null {
   try {
     const epochMs = new Date(sat.epoch).getTime();
     const dtDays = (now.getTime() - epochMs) / 86400000;
-    const n = sat.meanMotion * 2 * Math.PI; // rad/day
+    const n = sat.meanMotion * 2 * Math.PI;
     const ma = ((sat.meanAnomaly * Math.PI) / 180 + n * dtDays) % (2 * Math.PI);
-    const a = Math.pow(8683313.0 / (n * n), 1 / 3); // km from mean motion (Earth GM)
+    const a = Math.pow(8683313.0 / (n * n), 1 / 3);
     const e = Math.min(Math.max(sat.eccentricity, 0), 0.99);
     const E = solveKepler(ma, e);
     const nu = 2 * Math.atan2(Math.sqrt(1 + e) * Math.sin(E / 2), Math.sqrt(1 - e) * Math.cos(E / 2));
@@ -72,6 +81,7 @@ export function SatelliteSwarm() {
   const { data: catalog } = useSuspenseQuery(tleQueryOptions);
   const { data: iss } = useSuspenseQuery(issQueryOptions);
   const now = useNow();
+  const meshRef = useRef<THREE.InstancedMesh>(null);
 
   const filtered = useMemo(() => {
     let list = catalog;
@@ -81,14 +91,38 @@ export function SatelliteSwarm() {
     return list.slice(0, 5000);
   }, [catalog, layers]);
 
-  const positions = useMemo(() => {
-    const arr: number[] = [];
+  const { matrices, colors } = useMemo(() => {
+    const m = new THREE.Matrix4();
+    const pos = new THREE.Vector3();
+    const rot = new THREE.Quaternion();
+    const scl = new THREE.Vector3(1, 1, 1);
+    const matrices: THREE.Matrix4[] = [];
+    const colors: THREE.Color[] = [];
     for (const s of filtered) {
-      const pos = propagateSimple(s, now);
-      if (pos) arr.push(pos.x, pos.y, pos.z);
+      const p = propagateSimple(s, now);
+      if (!p) continue;
+      pos.copy(p);
+      m.compose(pos, rot, scl);
+      matrices.push(m.clone());
+      colors.push(GROUP_COLORS[s.group] ?? GROUP_COLORS.active);
     }
-    return new Float32Array(arr);
+    return { matrices, colors };
   }, [filtered, now]);
+
+  useEffect(() => {
+    if (!meshRef.current) return;
+    const mesh = meshRef.current;
+    const dummy = new THREE.Object3D();
+    for (let i = 0; i < matrices.length; i++) {
+      dummy.position.setFromMatrixPosition(matrices[i]);
+      dummy.updateMatrix();
+      mesh.setMatrixAt(i, dummy.matrix);
+      mesh.setColorAt(i, colors[i]);
+    }
+    mesh.count = matrices.length;
+    mesh.instanceMatrix.needsUpdate = true;
+    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+  }, [matrices, colors]);
 
   const issPos = useMemo(() => {
     if (!iss || !layers.iss) return null;
@@ -104,16 +138,14 @@ export function SatelliteSwarm() {
 
   return (
     <group>
-      <points>
-        <bufferGeometry>
-          <bufferAttribute attach="attributes-position" args={[positions, 3]} count={positions.length / 3} />
-        </bufferGeometry>
-        <pointsMaterial color="#ffb000" size={0.045} transparent opacity={0.85} sizeAttenuation />
-      </points>
+      <instancedMesh ref={meshRef} args={[undefined, undefined, matrices.length]}>
+        <sphereGeometry args={[0.035, 8, 8]} />
+        <meshBasicMaterial toneMapped={false} />
+      </instancedMesh>
       {issPos && (
         <mesh position={issPos}>
-          <sphereGeometry args={[0.06, 16, 16]} />
-          <meshBasicMaterial color="#00e5ff" />
+          <sphereGeometry args={[0.07, 16, 16]} />
+          <meshBasicMaterial color="#00e5ff" toneMapped={false} />
         </mesh>
       )}
     </group>
