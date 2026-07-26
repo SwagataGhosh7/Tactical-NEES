@@ -40,6 +40,10 @@ export const getSatelliteCatalog = createServerFn({ method: "GET" }).handler(asy
   const groups = ["starlink", "gps-ops", "active", "weather", "science", "stations"];
   const results = await Promise.all(groups.map(fetchGroup));
   const all = results.flat();
+  if (all.length === 0) {
+    const { fallbackSatellites } = await import("@/lib/fallbackData");
+    return fallbackSatellites();
+  }
   const seen = new Set<number>();
   const deduped: TleDto[] = [];
   for (const s of all) {
