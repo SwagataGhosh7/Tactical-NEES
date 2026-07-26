@@ -1,24 +1,43 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Suspense } from "react";
+import { TacticalScene } from "@/scene/Scene";
+import { TopBar } from "@/hud/TopBar";
+import { LeftRail } from "@/hud/LeftRail";
+import { RightReadout } from "@/hud/RightReadout";
+import { BottomTicker } from "@/hud/BottomTicker";
+import { BootSequence } from "@/hud/BootSequence";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "TACTICAL // Near-Earth Encounter System" },
+      { name: "description", content: "Retrofuturist WebGL tracker for asteroids, satellites, spacecraft and solar weather." },
+      { property: "og:title", content: "TACTICAL // Near-Earth Encounter System" },
+      { property: "og:description", content: "Retrofuturist WebGL tracker for asteroids, satellites, spacecraft and solar weather." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="fixed inset-0 overflow-hidden bg-black text-amber">
+      <BootSequence />
+      <TopBar />
+      <LeftRail />
+      <RightReadout />
+      <BottomTicker />
+      <Suspense
+        fallback={
+          <div className="flex h-screen w-screen items-center justify-center text-amber">
+            <div className="crt-glow text-sm">INITIALIZING SENSORS...</div>
+          </div>
+        }
+      >
+        <TacticalScene />
+      </Suspense>
     </div>
   );
 }
