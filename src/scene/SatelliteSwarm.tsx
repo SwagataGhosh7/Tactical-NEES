@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect, useRef } from "react";
+import { useMemo, useState, useEffect } from "react";
 import * as THREE from "three";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { useTacticalStore } from "@/state/useTacticalStore";
@@ -23,13 +23,13 @@ const issQueryOptions = queryOptions({
 const EARTH_RADIUS_KM = 6371;
 const SCALE = 1 / 7000;
 
-const GROUP_COLORS: Record<string, THREE.Color> = {
-  starlink: new THREE.Color("#ffb000"),
-  "gps-ops": new THREE.Color("#00e5ff"),
-  active: new THREE.Color("#a0a0a0"),
-  weather: new THREE.Color("#4ade80"),
-  science: new THREE.Color("#c084fc"),
-  stations: new THREE.Color("#ffffff"),
+const GROUP_COLOR: Record<string, number[]> = {
+  starlink: [1, 0.69, 0],
+  "gps-ops": [0, 0.9, 1],
+  active: [0.65, 0.65, 0.65],
+  weather: [0.3, 0.85, 0.5],
+  science: [0.75, 0.52, 0.99],
+  stations: [1, 1, 1],
 };
 
 function propagateSimple(sat: TleDto, now: Date): THREE.Vector3 | null {
@@ -81,48 +81,30 @@ export function SatelliteSwarm() {
   const { data: catalog } = useSuspenseQuery(tleQueryOptions);
   const { data: iss } = useSuspenseQuery(issQueryOptions);
   const now = useNow();
-  const meshRef = useRef<THREE.InstancedMesh>(null);
 
   const filtered = useMemo(() => {
     let list = catalog;
     if (!layers.starlink) list = list.filter((s) => !s.group.includes("starlink"));
     if (!layers.gps) list = list.filter((s) => !s.group.includes("gps"));
     if (!layers.otherSats) list = list.filter((s) => !["weather", "science", "stations", "active"].includes(s.group));
-    return list.slice(0, 5000);
+    return list.slice(0, 2000);
   }, [catalog, layers]);
 
-  const { matrices, colors } = useMemo(() => {
-    const m = new THREE.Matrix4();
-    const pos = new THREE.Vector3();
-    const rot = new THREE.Quaternion();
-    const scl = new THREE.Vector3(1, 1, 1);
-    const matrices: THREE.Matrix4[] = [];
-    const colors: THREE.Color[] = [];
+  const geometry = useMemo(() => {
+    const pos: number[] = [];
+    const col: number[] = [];
     for (const s of filtered) {
       const p = propagateSimple(s, now);
       if (!p) continue;
-      pos.copy(p);
-      m.compose(pos, rot, scl);
-      matrices.push(m.clone());
-      colors.push(GROUP_COLORS[s.group] ?? GROUP_COLORS.active);
+      pos.push(p.x, p.y, p.z);
+      const c = GROUP_COLOR[s.group] ?? GROUP_COLOR.active;
+      col.push(...c);
     }
-    return { matrices, colors };
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+    geo.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
+    return geo;
   }, [filtered, now]);
-
-  useEffect(() => {
-    if (!meshRef.current) return;
-    const mesh = meshRef.current;
-    const dummy = new THREE.Object3D();
-    for (let i = 0; i < matrices.length; i++) {
-      dummy.position.setFromMatrixPosition(matrices[i]);
-      dummy.updateMatrix();
-      mesh.setMatrixAt(i, dummy.matrix);
-      mesh.setColorAt(i, colors[i]);
-    }
-    mesh.count = matrices.length;
-    mesh.instanceMatrix.needsUpdate = true;
-    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
-  }, [matrices, colors]);
 
   const issPos = useMemo(() => {
     if (!iss || !layers.iss) return null;
@@ -138,10 +120,9 @@ export function SatelliteSwarm() {
 
   return (
     <group>
-      <instancedMesh ref={meshRef} args={[undefined, undefined, matrices.length]}>
-        <sphereGeometry args={[0.035, 8, 8]} />
-        <meshBasicMaterial toneMapped={false} />
-      </instancedMesh>
+      <points geometry={geometry}>
+        <pointsMaterial vertexColors size={0.055} transparent opacity={0.9} sizeAttenuation toneMapped={false} />
+      </points>
       {issPos && (
         <mesh position={issPos}>
           <sphereGeometry args={[0.07, 16, 16]} />
