@@ -5,10 +5,12 @@ import { useTacticalStore } from "@/state/useTacticalStore";
 import { ViewToggle } from "./ViewToggle";
 
 export function TopBar() {
+  const [mounted, setMounted] = useState(false);
   const [now, setNow] = useState(() => new Date());
   const view = useTacticalStore((s) => s.view);
 
   useEffect(() => {
+    setMounted(true);
     const id = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(id);
   }, []);
@@ -27,11 +29,13 @@ export function TopBar() {
       <div className="flex items-center gap-6">
         <div className="text-right">
           <div className="text-xs text-amber/60">UTC</div>
-          <div className="text-sm font-bold text-amber">{now.toISOString().replace("T", " ").slice(0, 19)}</div>
+          <div className="text-sm font-bold text-amber">
+            {mounted ? now.toISOString().replace("T", " ").slice(0, 19) : "----/--/-- --:--:--"}
+          </div>
         </div>
         <div className="text-right">
           <div className="text-xs text-amber/60">MET</div>
-          <div className="text-sm font-bold text-amber">T+{met.toString().padStart(6, "0")}s</div>
+          <div className="text-sm font-bold text-amber">T+{mounted ? met.toString().padStart(6, "0") : "------"}s</div>
         </div>
         <div className="flex items-center gap-2">
           <FeedLed label="NASA" active />
