@@ -3,9 +3,14 @@ import { createServerFn } from "@tanstack/react-start";
 export interface TleDto {
   noradId: number;
   name: string;
-  line1: string;
-  line2: string;
   group: string;
+  meanMotion: number; // revs/day
+  inclination: number; // deg
+  raan: number; // deg
+  eccentricity: number;
+  argOfPerigee: number; // deg
+  meanAnomaly: number; // deg
+  epoch: string;
 }
 
 async function fetchGroup(group: string): Promise<TleDto[]> {
@@ -13,12 +18,17 @@ async function fetchGroup(group: string): Promise<TleDto[]> {
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) throw new Error(`Celestrak ${group} error ${res.status}`);
   const data = await res.json();
-  return data.map((s: Record<string, string>) => ({
+  return data.map((s: Record<string, string | number>) => ({
     noradId: Number(s.NORAD_CAT_ID),
-    name: s.OBJECT_NAME,
-    line1: s.TLE_LINE1,
-    line2: s.TLE_LINE2,
+    name: String(s.OBJECT_NAME),
     group,
+    meanMotion: Number(s.MEAN_MOTION),
+    inclination: Number(s.INCLINATION),
+    raan: Number(s.RA_OF_ASC_NODE),
+    eccentricity: Number(s.ECCENTRICITY),
+    argOfPerigee: Number(s.ARG_OF_PERICENTER),
+    meanAnomaly: Number(s.MEAN_ANOMALY),
+    epoch: String(s.EPOCH),
   }));
 }
 

@@ -1,11 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useMemo, useState, useEffect } from "react";
 import * as THREE from "three";
-import * as satellite from "satellite.js";
-import { useTacticalStore } from "@/state/useTacticalStore";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
+import { useTacticalStore } from "@/state/useTacticalStore";
 import { getSatelliteCatalog, type TleDto } from "@/lib/feeds/tle.functions";
 import { getIssPosition } from "@/lib/feeds/iss.functions";
 
@@ -23,18 +21,50 @@ const issQueryOptions = queryOptions({
 });
 
 const EARTH_RADIUS_KM = 6371;
-const SCALE = 1 / 10000; // 1 unit = 10000 km
+const SCALE = 1 / 7000; // 1 unit ≈ 7000 km
 
-function satPosition(tle: TleDto, now: Date): THREE.Vector3 | null {
+function propagateSimple(sat: TleDto, now: Date): THREE.Vector3 | null {
   try {
-    const satrec = satellite.twoline2satrec(tle.line1, tle.line2);
-    const pv = satellite.propagate(satrec, now);
-    if (!pv || !pv.position || typeof pv.position === "boolean") return null;
-    const p = pv.position as satellite.EciVec3<number>;
-    return new THREE.Vector3(p.x, p.z, -p.y).multiplyScalar(SCALE);
+    const epochMs = new Date(sat.epoch).getTime();
+    const dtDays = (now.getTime() - epochMs) / 86400000;
+    const n = sat.meanMotion * 2 * Math.PI; // rad/day
+    const ma = ((sat.meanAnomaly * Math.PI) / 180 + n * dtDays) % (2 * Math.PI);
+    const a = Math.pow(8683313.0 / (n * n), 1 / 3); // km from mean motion (Earth GM)
+    const e = Math.min(Math.max(sat.eccentricity, 0), 0.99);
+    const E = solveKepler(ma, e);
+    const nu = 2 * Math.atan2(Math.sqrt(1 + e) * Math.sin(E / 2), Math.sqrt(1 - e) * Math.cos(E / 2));
+    const r = a * (1 - e * Math.cos(E));
+    const xOrb = r * Math.cos(nu);
+    const yOrb = r * Math.sin(nu);
+
+    const i = (sat.inclination * Math.PI) / 180;
+    const raan = (sat.raan * Math.PI) / 180;
+    const arg = (sat.argOfPerigee * Math.PI) / 180;
+
+    const cosRaan = Math.cos(raan), sinRaan = Math.sin(raan);
+    const cosArg = Math.cos(arg), sinArg = Math.sin(arg);
+    const cosI = Math.cos(i), sinI = Math.sin(i);
+
+    const x = xOrb * (cosRaan * cosArg - sinRaan * sinArg * cosI) - yOrb * (cosRaan * sinArg + sinRaan * cosArg * cosI);
+    const y = xOrb * (sinRaan * cosArg + cosRaan * sinArg * cosI) - yOrb * (sinRaan * sinArg - cosRaan * cosArg * cosI);
+    const z = xOrb * sinArg * sinI + yOrb * cosArg * sinI;
+
+    return new THREE.Vector3(x, z, -y).multiplyScalar(SCALE);
   } catch {
     return null;
   }
+}
+
+function solveKepler(M: number, e: number, eps = 1e-7): number {
+  let E = M;
+  for (let i = 0; i < 30; i++) {
+    const f = E - e * Math.sin(E) - M;
+    const fp = 1 - e * Math.cos(E);
+    const dE = f / fp;
+    E -= dE;
+    if (Math.abs(dE) < eps) break;
+  }
+  return E;
 }
 
 export function SatelliteSwarm() {
@@ -47,14 +77,14 @@ export function SatelliteSwarm() {
     let list = catalog;
     if (!layers.starlink) list = list.filter((s) => !s.group.includes("starlink"));
     if (!layers.gps) list = list.filter((s) => !s.group.includes("gps"));
-    if (!layers.otherSats) list = list.filter((s) => ["starlink", "gps-ops", "active"].includes(s.group));
+    if (!layers.otherSats) list = list.filter((s) => !["weather", "science", "stations", "active"].includes(s.group));
     return list.slice(0, 5000);
   }, [catalog, layers]);
 
   const positions = useMemo(() => {
     const arr: number[] = [];
     for (const s of filtered) {
-      const pos = satPosition(s, now);
+      const pos = propagateSimple(s, now);
       if (pos) arr.push(pos.x, pos.y, pos.z);
     }
     return new Float32Array(arr);
@@ -75,11 +105,7 @@ export function SatelliteSwarm() {
     <group>
       <points>
         <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            args={[positions, 3]}
-            count={positions.length / 3}
-          />
+          <bufferAttribute attach="attributes-position" args={[positions, 3]} count={positions.length / 3} />
         </bufferGeometry>
         <pointsMaterial color="#ffb000" size={0.045} transparent opacity={0.85} sizeAttenuation />
       </points>
