@@ -19,7 +19,10 @@ export const getNeoFeed = createServerFn({ method: "GET" }).handler(async () => 
   const url = `https://api.nasa.gov/neo/rest/v1/feed?start_date=${start}&end_date=${endDate}&api_key=${key}`;
   try {
     const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) return [] as NeoDto[];
+    if (!res.ok) {
+      const { fallbackNeos } = await import("@/lib/fallbackData");
+      return fallbackNeos();
+    }
     const data = await res.json();
     const out: NeoDto[] = [];
     for (const day of Object.keys(data.near_earth_objects)) {
@@ -39,8 +42,13 @@ export const getNeoFeed = createServerFn({ method: "GET" }).handler(async () => 
         });
       }
     }
+    if (out.length === 0) {
+      const { fallbackNeos } = await import("@/lib/fallbackData");
+      return fallbackNeos();
+    }
     return out.sort((a, b) => a.missDistanceAu - b.missDistanceAu);
   } catch {
-    return [] as NeoDto[];
+    const { fallbackNeos } = await import("@/lib/fallbackData");
+    return fallbackNeos();
   }
 });
