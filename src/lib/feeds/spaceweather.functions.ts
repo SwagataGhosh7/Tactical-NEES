@@ -36,14 +36,18 @@ export const getDonkiAlerts = createServerFn({ method: "GET" }).handler(async ()
   const start = new Date(Date.now() - 7 * 86400000).toISOString().split("T")[0];
   const end = new Date().toISOString().split("T")[0];
   const url = `https://api.nasa.gov/DONKI/notifications?startDate=${start}&endDate=${end}&type=all&api_key=${key}`;
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) return [] as DonkiAlertDto[];
-  const data = await res.json();
-  return (Array.isArray(data) ? data : [])
-    .slice(0, 20)
-    .map((a: Record<string, string>) => ({
-      messageType: a.messageType || "SPACE_WEATHER",
-      startTime: a.messageIssueTime || a.startTime || new Date().toISOString(),
-      link: a.messageURL || "#",
-    })) as DonkiAlertDto[];
+  try {
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) return [] as DonkiAlertDto[];
+    const data = await res.json();
+    return (Array.isArray(data) ? data : [])
+      .slice(0, 20)
+      .map((a: Record<string, string>) => ({
+        messageType: a.messageType || "SPACE_WEATHER",
+        startTime: a.messageIssueTime || a.startTime || new Date().toISOString(),
+        link: a.messageURL || "#",
+      })) as DonkiAlertDto[];
+  } catch {
+    return [] as DonkiAlertDto[];
+  }
 });
