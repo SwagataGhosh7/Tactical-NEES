@@ -29,7 +29,7 @@ function satPosition(tle: TleDto, now: Date): THREE.Vector3 | null {
   try {
     const satrec = satellite.twoline2satrec(tle.line1, tle.line2);
     const pv = satellite.propagate(satrec, now);
-    if (!pv.position || typeof pv.position === "boolean") return null;
+    if (!pv || !pv.position || typeof pv.position === "boolean") return null;
     const p = pv.position as satellite.EciVec3<number>;
     return new THREE.Vector3(p.x, p.z, -p.y).multiplyScalar(SCALE);
   } catch {
