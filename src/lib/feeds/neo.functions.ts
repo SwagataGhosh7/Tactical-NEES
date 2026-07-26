@@ -17,7 +17,7 @@ export const getNeoFeed = createServerFn({ method: "GET" }).handler(async () => 
   const start = new Date().toISOString().split("T")[0];
   const endDate = new Date(Date.now() + 7 * 86400000).toISOString().split("T")[0];
   const url = `https://api.nasa.gov/neo/rest/v1/feed?start_date=${start}&end_date=${endDate}&api_key=${key}`;
-  const res = await fetch(url, { next: { revalidate: 3600 } });
+  const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) throw new Error(`NeoWs feed error ${res.status}`);
   const data = await res.json();
   const out: NeoDto[] = [];

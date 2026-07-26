@@ -10,7 +10,7 @@ export interface TleDto {
 
 async function fetchGroup(group: string): Promise<TleDto[]> {
   const url = `https://celestrak.org/NORAD/elements/gp.php?GROUP=${group}&FORMAT=json`;
-  const res = await fetch(url, { next: { revalidate: 21600 } });
+  const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) throw new Error(`Celestrak ${group} error ${res.status}`);
   const data = await res.json();
   return data.map((s: Record<string, string>) => ({

@@ -16,7 +16,7 @@ export interface DonkiAlertDto {
 export const getSolarWind = createServerFn({ method: "GET" }).handler(async () => {
   try {
     const res = await fetch("https://services.swpc.noaa.gov/products/summary/ace-swepam/summary.json", {
-      next: { revalidate: 300 },
+      cache: "no-store",
     });
     if (!res.ok) throw new Error(`Solar wind error ${res.status}`);
     const data = await res.json();
@@ -36,7 +36,7 @@ export const getDonkiAlerts = createServerFn({ method: "GET" }).handler(async ()
   const start = new Date(Date.now() - 7 * 86400000).toISOString().split("T")[0];
   const end = new Date().toISOString().split("T")[0];
   const url = `https://api.nasa.gov/DONKI/notifications?startDate=${start}&endDate=${end}&type=all&api_key=${key}`;
-  const res = await fetch(url, { next: { revalidate: 300 } });
+  const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) return [] as DonkiAlertDto[];
   const data = await res.json();
   return (Array.isArray(data) ? data : [])

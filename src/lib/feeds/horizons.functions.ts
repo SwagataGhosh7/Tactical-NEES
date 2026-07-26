@@ -37,14 +37,14 @@ export const getSpacecraftPositions = createServerFn({ method: "GET" }).handler(
       url.searchParams.set("STEP_SIZE", "1d");
       url.searchParams.set("OUT_UNITS", "AU-D");
       try {
-        const res = await fetch(url.toString(), { next: { revalidate: 900 } });
+        const res = await fetch(url.toString(), { cache: "no-store" });
         if (!res.ok) return null;
         const data = await res.json();
         const text = data.result || "";
         const m = text.match(/\$\$SOE[\s\S]*?\$\$EOE/);
         if (!m) return null;
         const lines = m[0].split("\n");
-        const line = lines.find((l) => l.includes("X ="));
+        const line = lines.find((l: string) => l.includes("X ="));
         if (!line) return null;
         const parts = line.split(/\s+/).filter(Boolean);
         const x = parseFloat(parts[2]);
