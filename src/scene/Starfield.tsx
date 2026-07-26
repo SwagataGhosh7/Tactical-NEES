@@ -22,9 +22,8 @@ export function Starfield() {
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
+          args={[points, 3]}
           count={points.length / 3}
-          array={points}
-          itemSize={3}
         />
       </bufferGeometry>
       <pointsMaterial color="#ffb000" size={0.08} transparent opacity={0.7} sizeAttenuation />
