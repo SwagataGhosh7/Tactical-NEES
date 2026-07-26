@@ -21,15 +21,24 @@ const issQueryOptions = queryOptions({
 });
 
 const EARTH_RADIUS_KM = 6371;
-const SCALE = 1 / 7000; // 1 unit ≈ 7000 km
+const SCALE = 1 / 7000;
+
+const GROUP_COLOR: Record<string, number[]> = {
+  starlink: [1, 0.69, 0],
+  "gps-ops": [0, 0.9, 1],
+  active: [0.65, 0.65, 0.65],
+  weather: [0.3, 0.85, 0.5],
+  science: [0.75, 0.52, 0.99],
+  stations: [1, 1, 1],
+};
 
 function propagateSimple(sat: TleDto, now: Date): THREE.Vector3 | null {
   try {
     const epochMs = new Date(sat.epoch).getTime();
     const dtDays = (now.getTime() - epochMs) / 86400000;
-    const n = sat.meanMotion * 2 * Math.PI; // rad/day
+    const n = sat.meanMotion * 2 * Math.PI;
     const ma = ((sat.meanAnomaly * Math.PI) / 180 + n * dtDays) % (2 * Math.PI);
-    const a = Math.pow(8683313.0 / (n * n), 1 / 3); // km from mean motion (Earth GM)
+    const a = Math.pow(8683313.0 / (n * n), 1 / 3);
     const e = Math.min(Math.max(sat.eccentricity, 0), 0.99);
     const E = solveKepler(ma, e);
     const nu = 2 * Math.atan2(Math.sqrt(1 + e) * Math.sin(E / 2), Math.sqrt(1 - e) * Math.cos(E / 2));
@@ -78,16 +87,23 @@ export function SatelliteSwarm() {
     if (!layers.starlink) list = list.filter((s) => !s.group.includes("starlink"));
     if (!layers.gps) list = list.filter((s) => !s.group.includes("gps"));
     if (!layers.otherSats) list = list.filter((s) => !["weather", "science", "stations", "active"].includes(s.group));
-    return list.slice(0, 5000);
+    return list.slice(0, 2000);
   }, [catalog, layers]);
 
-  const positions = useMemo(() => {
-    const arr: number[] = [];
+  const geometry = useMemo(() => {
+    const pos: number[] = [];
+    const col: number[] = [];
     for (const s of filtered) {
-      const pos = propagateSimple(s, now);
-      if (pos) arr.push(pos.x, pos.y, pos.z);
+      const p = propagateSimple(s, now);
+      if (!p) continue;
+      pos.push(p.x, p.y, p.z);
+      const c = GROUP_COLOR[s.group] ?? GROUP_COLOR.active;
+      col.push(...c);
     }
-    return new Float32Array(arr);
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+    geo.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
+    return geo;
   }, [filtered, now]);
 
   const issPos = useMemo(() => {
@@ -104,16 +120,13 @@ export function SatelliteSwarm() {
 
   return (
     <group>
-      <points>
-        <bufferGeometry>
-          <bufferAttribute attach="attributes-position" args={[positions, 3]} count={positions.length / 3} />
-        </bufferGeometry>
-        <pointsMaterial color="#ffb000" size={0.045} transparent opacity={0.85} sizeAttenuation />
+      <points geometry={geometry}>
+        <pointsMaterial vertexColors size={0.055} transparent opacity={0.9} sizeAttenuation toneMapped={false} />
       </points>
       {issPos && (
         <mesh position={issPos}>
-          <sphereGeometry args={[0.06, 16, 16]} />
-          <meshBasicMaterial color="#00e5ff" />
+          <sphereGeometry args={[0.07, 16, 16]} />
+          <meshBasicMaterial color="#00e5ff" toneMapped={false} />
         </mesh>
       )}
     </group>

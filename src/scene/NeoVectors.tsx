@@ -40,26 +40,29 @@ export function NeoVectors() {
 }
 
 function NeoArrow({ neo }: { neo: NeoDto }) {
-  const dir = useMemo(() => {
+  const { dir, length, color, headSize, start, end } = useMemo(() => {
     const theta = Math.random() * Math.PI * 2;
     const phi = Math.acos(2 * Math.random() - 1);
-    return new THREE.Vector3(
+    const direction = new THREE.Vector3(
       Math.sin(phi) * Math.cos(theta),
       Math.sin(phi) * Math.sin(theta),
       Math.cos(phi)
     ).normalize();
-  }, [neo.id]);
 
-  const length = Math.max(2, 5 - neo.missDistanceAu * 60);
-  const color = neo.hazardous ? "#ff2a2a" : neo.missDistanceAu < 0.01 ? "#ff7a00" : "#ffb000";
-  const start = dir.clone().multiplyScalar(2.2 + length * 0.5);
-  const end = dir.clone().multiplyScalar(2.2);
+    const miss = Math.max(0.001, neo.missDistanceAu);
+    const len = Math.min(6, Math.max(1.2, 1.5 / Math.sqrt(miss)));
+    const col = neo.hazardous ? "#ff2a2a" : neo.missDistanceAu < 0.01 ? "#ff7a00" : "#ffb000";
+    const hs = Math.min(0.18, 0.06 + len * 0.02);
+    const s = direction.clone().multiplyScalar(1.6 + len * 0.35);
+    const e = direction.clone().multiplyScalar(1.6);
+    return { dir: direction, length: len, color: col, headSize: hs, start: s, end: e };
+  }, [neo.id, neo.missDistanceAu, neo.hazardous]);
 
   return (
     <group>
-      <primitive object={new THREE.ArrowHelper(dir, start, length, color, 0.25, 0.12)} />
+      <primitive object={new THREE.ArrowHelper(dir, start, length, color, headSize, headSize * 0.6)} />
       <mesh position={end}>
-        <sphereGeometry args={[0.04 + neo.diameterMaxM / 2000, 12, 12]} />
+        <sphereGeometry args={[0.03 + Math.min(0.12, neo.diameterMaxM / 5000), 12, 12]} />
         <meshBasicMaterial color={color} />
       </mesh>
     </group>
