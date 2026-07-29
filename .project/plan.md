@@ -104,7 +104,7 @@ src/styles.css                       # amber CRT tokens, scanline layer
 
 ## Build order
 
-1. Enable Lovable Cloud + store `NASA_API_KEY`. Add design tokens, fonts, CRT effect layer.
+1. Enable Cloud + store `NASA_API_KEY`. Add design tokens, fonts, CRT effect layer.
 2. Boot sequence + shell (TopBar / LeftRail / RightReadout / BottomTicker) with static mock data.
 3. WebGL scene skeleton (starfield, Earth, Sun, camera controls, postprocessing).
 4. Feed server functions + TanStack Query hooks with normalized DTOs.
