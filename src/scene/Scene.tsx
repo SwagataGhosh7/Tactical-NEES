@@ -20,11 +20,20 @@ export function TacticalScene() {
     <Canvas
       camera={{ position: isGeo ? [0, 0, 12] : [0, 15, 35], fov: 55 }}
       gl={{ antialias: true, alpha: false, powerPreference: "high-performance" }}
+      shadows
       className="!fixed inset-0 !h-screen !w-screen"
     >
-      <color attach="background" args={["#020203"]} />
-      <ambientLight intensity={0.12} />
-      <pointLight position={[10, 10, 10]} intensity={1.2} color="#ffb000" />
+      <color attach="background" args={["#000005"]} />
+      <ambientLight intensity={0.05} />
+      <directionalLight
+        position={[10, 10, 10]}
+        intensity={1.5}
+        color="#fff5e0"
+        castShadow
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+      />
+      <pointLight position={[10, 10, 10]} intensity={0.8} color="#ffb000" />
       <Stars radius={300} depth={60} count={4000} factor={4} saturation={0} fade speed={1} />
       <Starfield />
 
