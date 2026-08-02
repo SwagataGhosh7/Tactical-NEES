@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useTacticalStore } from "@/state/useTacticalStore";
 import { CosmicVisualization } from "@/scene/CosmicVisualization";
+import { VRXRCosmicExperience } from "@/scene/VRXRCosmicExperience";
 
 interface CosmicImage {
   id: string;
@@ -35,6 +36,7 @@ export function CosmicDashboard() {
   const [loading, setLoading] = useState(false);
   const [show3DVisualization, setShow3DVisualization] = useState(false);
   const [explorationDistance, setExplorationDistance] = useState(0);
+  const [xrMode, setXRMode] = useState<"VR" | "AR" | null>(null);
 
   const layers = useTacticalStore((s) => s.layers);
 
@@ -47,7 +49,6 @@ export function CosmicDashboard() {
   const loadCategoryImages = async (category: CosmicCategory) => {
     setLoading(true);
     try {
-      // Using NASA's Image and Video Library API
       const response = await fetch(
         `https://images-api.nasa.gov/search?q=${getSearchQuery(category)}&media_type=image`
       );
@@ -65,7 +66,6 @@ export function CosmicDashboard() {
       setImages(cosmicImages);
     } catch (error) {
       console.error("Failed to load cosmic images:", error);
-      // Fallback to placeholder images
       setImages(getFallbackImages(category));
     } finally {
       setLoading(false);
@@ -85,7 +85,6 @@ export function CosmicDashboard() {
   };
 
   const getFallbackImages = (category: CosmicCategory): CosmicImage[] => {
-    // Fallback images when API fails
     return [
       {
         id: "fallback-1",
@@ -167,7 +166,6 @@ export function CosmicDashboard() {
   return (
     <div className="fixed inset-0 z-50 bg-black/95 p-4 overflow-y-auto">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-cyan-400 neon-text">COSMIC DASHBOARD</h1>
@@ -181,7 +179,6 @@ export function CosmicDashboard() {
           </button>
         </div>
 
-        {/* Virtual Exploration Section */}
         <div className="mb-8 crt-panel p-4">
           <h2 className="text-sm font-bold text-cyan-400 neon-text mb-3">VIRTUAL EXPLORATION</h2>
           <div className="flex gap-4 items-end">
@@ -208,17 +205,35 @@ export function CosmicDashboard() {
               <div className="text-sm font-bold text-cyan-400">{virtualPosition.location}</div>
               <div className="text-xs text-cyan-400/60 mt-1">{virtualPosition.description}</div>
               <div className="text-[10px] text-cyan-400/40 mt-2">Distance: {virtualPosition.distance} light-years</div>
-              <button
-                onClick={() => setShow3DVisualization(true)}
-                className="mt-3 px-4 py-2 bg-cyan-400/20 border border-cyan-400/60 text-cyan-400 hover:bg-cyan-400/30 transition-colors text-xs"
-              >
-                LAUNCH 3D SIMULATION
-              </button>
+              <div className="mt-3 flex gap-2">
+                <button
+                  onClick={() => setShow3DVisualization(true)}
+                  className="flex-1 px-4 py-2 bg-cyan-400/20 border border-cyan-400/60 text-cyan-400 hover:bg-cyan-400/30 transition-colors text-xs"
+                >
+                  3D SIMULATION
+                </button>
+                <button
+                  onClick={() => setXRMode("VR")}
+                  className="flex-1 px-4 py-2 bg-purple-500/20 border border-purple-400/60 text-purple-400 hover:bg-purple-500/30 transition-colors text-xs"
+                  title="Requires VR headset and WebXR-compatible browser"
+                >
+                  VR MODE
+                </button>
+                <button
+                  onClick={() => setXRMode("AR")}
+                  className="flex-1 px-4 py-2 bg-pink-500/20 border border-pink-400/60 text-pink-400 hover:bg-pink-500/30 transition-colors text-xs"
+                  title="Requires mobile device with WebAR support"
+                >
+                  AR MODE
+                </button>
+              </div>
+              <div className="text-[9px] text-cyan-400/40 mt-2">
+                * VR/AR modes require compatible hardware and browsers
+              </div>
             </div>
           )}
         </div>
 
-        {/* Category Tabs */}
         <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
           {categories.map((cat) => (
             <button
@@ -235,7 +250,6 @@ export function CosmicDashboard() {
           ))}
         </div>
 
-        {/* Category Description */}
         <div className="mb-6">
           <h3 className="text-sm font-bold text-cyan-400">
             {categories.find((c) => c.key === selectedCategory)?.label}
@@ -245,7 +259,6 @@ export function CosmicDashboard() {
           </p>
         </div>
 
-        {/* Image Gallery */}
         {loading ? (
           <div className="flex items-center justify-center h-64 text-cyan-400/60">
             <div className="text-sm">Loading cosmic imagery...</div>
@@ -279,7 +292,6 @@ export function CosmicDashboard() {
           </div>
         )}
 
-        {/* Image Modal */}
         {selectedImage && (
           <div
             className="fixed inset-0 z-60 bg-black/90 flex items-center justify-center p-4"
@@ -316,11 +328,19 @@ export function CosmicDashboard() {
           </div>
         )}
 
-        {/* 3D Visualization */}
         {show3DVisualization && (
           <CosmicVisualization 
             distance={explorationDistance} 
             onClose={() => setShow3DVisualization(false)} 
+          />
+        )}
+
+        {xrMode && (
+          <VRXRCosmicExperience 
+            distance={explorationDistance} 
+            onClose={() => setXRMode(null)}
+            mode={xrMode}
+            onSwitchTo3D={() => setShow3DVisualization(true)}
           />
         )}
       </div>
