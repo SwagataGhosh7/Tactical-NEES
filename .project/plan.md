@@ -1,5 +1,5 @@
 
-# TACTICAL: Near-Earth Encounter System
+# SENTINEL: Earth Space Monitor
 
 A single-page WebGL app with two toggleable views (Earth tactical / Heliocentric solar system) styled as a Star Wars-era amber phosphor CRT tactical console, streaming live data from NASA + JPL + Celestrak.
 
@@ -100,7 +100,7 @@ src/styles.css                       # amber CRT tokens, scanline layer
 
 **Design tokens** added to `styles.css`: `--amber`, `--amber-glow`, `--hot-orange`, `--alert-red`, `--phosphor-dim`, `--grid`, `--scan-line`, plus gradients and box-shadow glow presets. Fonts loaded via `<link>` in `__root.tsx` head (VT323 + JetBrains Mono).
 
-**SEO / head**: unique `head()` on `/` — title "NEAR-EARTH ENCOUNTER SYSTEM // TACTICAL", description, og/twitter.
+**SEO / head**: unique `head()` on `/` — title "EARTH SPACE MONITOR // SENTINEL", description, og/twitter.
 
 ## Build order
 

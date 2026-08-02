@@ -20,22 +20,22 @@ export function TopBar() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex h-14 items-center justify-between px-4 crt-panel">
       <div className="flex items-center gap-4">
-        <div className="text-lg font-bold tracking-widest text-amber crt-glow">TACTICAL</div>
-        <div className="hidden h-4 w-px bg-amber/30 md:block" />
-        <div className="text-xs text-amber/80">
-          VIEW: <span className="font-bold uppercase text-amber">{view}</span>
+        <div className="text-lg font-bold tracking-widest text-cyan-400 neon-text">SENTINEL</div>
+        <div className="hidden h-4 w-px bg-cyan-400/30 md:block" />
+        <div className="text-xs text-cyan-400/80">
+          VIEW: <span className="font-bold uppercase text-cyan-400">{view}</span>
         </div>
       </div>
       <div className="flex items-center gap-6">
         <div className="text-right">
-          <div className="text-xs text-amber/60">UTC</div>
-          <div className="text-sm font-bold text-amber">
+          <div className="text-xs text-cyan-400/60">UTC</div>
+          <div className="text-sm font-bold text-cyan-400">
             {mounted ? now.toISOString().replace("T", " ").slice(0, 19) : "----/--/-- --:--:--"}
           </div>
         </div>
         <div className="text-right">
-          <div className="text-xs text-amber/60">MET</div>
-          <div className="text-sm font-bold text-amber">T+{mounted ? met.toString().padStart(6, "0") : "------"}s</div>
+          <div className="text-xs text-cyan-400/60">MET</div>
+          <div className="text-sm font-bold text-cyan-400">T+{mounted ? met.toString().padStart(6, "0") : "------"}s</div>
         </div>
         <div className="flex items-center gap-2">
           <FeedLed label="NASA" active />
@@ -51,8 +51,8 @@ export function TopBar() {
 function FeedLed({ label, active }: { label: string; active: boolean }) {
   return (
     <div className="flex flex-col items-center gap-1">
-      <div className={`h-2 w-2 rounded-full ${active ? "bg-amber shadow-[0_0_6px_#ffb000]" : "bg-amber/20"}`} />
-      <span className="text-[9px] text-amber/60">{label}</span>
+      <div className={`h-2 w-2 rounded-full ${active ? "bg-cyan-400 shadow-[0_0_6px_#00ffff]" : "bg-cyan-400/20"}`} />
+      <span className="text-[9px] text-cyan-400/60">{label}</span>
     </div>
   );
 }

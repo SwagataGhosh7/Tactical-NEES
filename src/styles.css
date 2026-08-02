@@ -5,9 +5,9 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * TACTICAL — retro-futurist CRT design system.
+ * SENTINEL — retro-futurist CRT design system.
  *
- * Palette: amber phosphor on deep black, hot orange alerts, dim cyan accents.
+ * Palette: neon cyan/pink phosphor on deep black, magenta accents, electric blue glows.
  */
 
 @theme inline {
@@ -53,11 +53,12 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   /* Tactical semantic tokens */
-  --color-amber: var(--amber);
-  --color-amber-glow: var(--amber-glow);
-  --color-hot-orange: var(--hot-orange);
+  --color-neon-cyan: var(--neon-cyan);
+  --color-neon-pink: var(--neon-pink);
+  --color-neon-purple: var(--neon-purple);
+  --color-electric-blue: var(--electric-blue);
+  --color-magenta: var(--magenta);
   --color-alert-red: var(--alert-red);
-  --color-cyan: var(--cyan);
   --color-phosphor-dim: var(--phosphor-dim);
   --color-grid: var(--grid);
 }
@@ -65,45 +66,46 @@
 :root {
   --radius: 0.25rem;
   --background: oklch(0.05 0.01 260);
-  --foreground: oklch(0.88 0.12 75);
+  --foreground: oklch(0.85 0.15 180);
   --card: oklch(0.08 0.01 260);
-  --card-foreground: oklch(0.88 0.12 75);
+  --card-foreground: oklch(0.85 0.15 180);
   --popover: oklch(0.08 0.01 260);
-  --popover-foreground: oklch(0.88 0.12 75);
-  --primary: oklch(0.75 0.18 75);
+  --popover-foreground: oklch(0.85 0.15 180);
+  --primary: oklch(0.7 0.2 180);
   --primary-foreground: oklch(0.05 0.01 260);
   --secondary: oklch(0.15 0.02 260);
-  --secondary-foreground: oklch(0.88 0.12 75);
+  --secondary-foreground: oklch(0.85 0.15 180);
   --muted: oklch(0.15 0.02 260);
-  --muted-foreground: oklch(0.65 0.08 75);
-  --accent: oklch(0.2 0.05 180);
-  --accent-foreground: oklch(0.9 0.05 180);
+  --muted-foreground: oklch(0.6 0.15 180);
+  --accent: oklch(0.7 0.25 300);
+  --accent-foreground: oklch(0.9 0.1 180);
   --destructive: oklch(0.55 0.25 25);
   --destructive-foreground: oklch(0.95 0.05 25);
-  --border: oklch(0.75 0.18 75 / 25%);
-  --input: oklch(0.75 0.18 75 / 15%);
-  --ring: oklch(0.75 0.18 75 / 60%);
-  --chart-1: oklch(0.75 0.18 75);
-  --chart-2: oklch(0.7 0.15 180);
+  --border: oklch(0.65 0.2 180 / 25%);
+  --input: oklch(0.65 0.2 180 / 15%);
+  --ring: oklch(0.65 0.2 180 / 60%);
+  --chart-1: oklch(0.7 0.2 180);
+  --chart-2: oklch(0.7 0.25 300);
   --chart-3: oklch(0.55 0.25 25);
-  --chart-4: oklch(0.65 0.2 300);
+  --chart-4: oklch(0.65 0.2 60);
   --chart-5: oklch(0.6 0.22 140);
   --sidebar: oklch(0.07 0.01 260);
-  --sidebar-foreground: oklch(0.88 0.12 75);
-  --sidebar-primary: oklch(0.75 0.18 75);
+  --sidebar-foreground: oklch(0.85 0.15 180);
+  --sidebar-primary: oklch(0.7 0.2 180);
   --sidebar-primary-foreground: oklch(0.05 0.01 260);
   --sidebar-accent: oklch(0.15 0.02 260);
-  --sidebar-accent-foreground: oklch(0.88 0.12 75);
-  --sidebar-border: oklch(0.75 0.18 75 / 15%);
-  --sidebar-ring: oklch(0.75 0.18 75 / 60%);
+  --sidebar-accent-foreground: oklch(0.85 0.15 180);
+  --sidebar-border: oklch(0.65 0.2 180 / 15%);
+  --sidebar-ring: oklch(0.65 0.2 180 / 60%);
   /* Tactical extras */
-  --amber: #ffb000;
-  --amber-glow: #ffcc00;
-  --hot-orange: #ff7a00;
+  --neon-cyan: #00ffff;
+  --neon-pink: #ff00ff;
+  --neon-purple: #9d00ff;
+  --electric-blue: #00a8ff;
+  --magenta: #ff0080;
   --alert-red: #ff2a2a;
-  --cyan: #00e5ff;
-  --phosphor-dim: oklch(0.55 0.08 75);
-  --grid: oklch(0.75 0.18 75 / 8%);
+  --phosphor-dim: oklch(0.55 0.15 180);
+  --grid: oklch(0.65 0.2 180 / 8%);
 }
 
 @layer base {
@@ -119,25 +121,35 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-mono);
-    text-shadow: 0 0 2px var(--color-amber);
+    text-shadow: 0 0 2px var(--color-neon-cyan);
   }
 }
 
 @layer utilities {
   .crt-glow {
-    text-shadow: 0 0 2px var(--color-amber), 0 0 8px var(--color-amber);
+    text-shadow: 0 0 2px var(--color-neon-cyan), 0 0 8px var(--color-neon-cyan);
+  }
+  .crt-glow-pink {
+    text-shadow: 0 0 2px var(--color-neon-pink), 0 0 8px var(--color-neon-pink);
   }
   .crt-glow-red {
     text-shadow: 0 0 2px var(--color-alert-red), 0 0 8px var(--color-alert-red);
   }
   .crt-border {
-    border: 1px solid oklch(0.75 0.18 75 / 35%);
-    box-shadow: 0 0 6px oklch(0.75 0.18 75 / 15%), inset 0 0 12px oklch(0.75 0.18 75 / 5%);
+    border: 1px solid oklch(0.65 0.2 180 / 35%);
+    box-shadow: 0 0 6px oklch(0.65 0.2 180 / 15%), inset 0 0 12px oklch(0.65 0.2 180 / 5%);
+  }
+  .neon-border {
+    border: 1px solid var(--color-neon-cyan);
+    box-shadow: 0 0 8px var(--color-neon-cyan), inset 0 0 8px rgba(0, 255, 255, 0.2);
+  }
+  .neon-text {
+    text-shadow: 0 0 4px var(--color-neon-cyan), 0 0 8px var(--color-neon-cyan), 0 0 12px var(--color-neon-cyan);
   }
   .crt-panel {
     background: oklch(0.05 0.01 260 / 85%);
-    border: 1px solid oklch(0.75 0.18 75 / 30%);
-    box-shadow: 0 0 8px oklch(0.75 0.18 75 / 12%), inset 0 0 20px oklch(0.75 0.18 75 / 4%);
+    border: 1px solid oklch(0.65 0.2 180 / 30%);
+    box-shadow: 0 0 8px oklch(0.65 0.2 180 / 12%), inset 0 0 20px oklch(0.65 0.2 180 / 4%);
   }
   .corner-brackets {
     position: relative;
@@ -148,7 +160,7 @@
     position: absolute;
     width: 0.5rem;
     height: 0.5rem;
-    border-color: var(--color-amber);
+    border-color: var(--color-neon-cyan);
   }
   .corner-brackets::before {
     top: -1px;
@@ -165,8 +177,8 @@
   .hazard-stripe {
     background: repeating-linear-gradient(
       45deg,
-      oklch(0.75 0.18 75 / 12%),
-      oklch(0.75 0.18 75 / 12%) 6px,
+      oklch(0.65 0.2 180 / 12%),
+      oklch(0.65 0.2 180 / 12%) 6px,
       transparent 6px,
       transparent 12px
     );

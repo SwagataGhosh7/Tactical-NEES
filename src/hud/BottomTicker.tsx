@@ -37,7 +37,7 @@ export function BottomTicker() {
           THREAT BOARD
         </div>
         <div className="relative flex-1 overflow-hidden">
-          <div className="animate-marquee whitespace-nowrap text-xs text-amber/90">
+          <div className="animate-marquee whitespace-nowrap text-xs text-cyan-400/90">
             {items.map((item, i) => (
               <span key={i} className="mx-8 inline-block">
                 {item}

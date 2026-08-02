@@ -7,11 +7,11 @@ export function ViewToggle() {
   const setView = useTacticalStore((s) => s.setView);
 
   return (
-    <div className="flex items-center gap-2 rounded border border-amber/30 bg-black/50 px-2 py-1">
+    <div className="flex items-center gap-2 rounded border border-cyan-400/30 bg-black/50 px-2 py-1">
       <button
         onClick={() => setView("geocentric")}
         className={`px-2 py-1 text-xs font-bold transition-colors ${
-          view === "geocentric" ? "bg-amber text-black" : "text-amber hover:bg-amber/10"
+          view === "geocentric" ? "bg-cyan-400 text-black" : "text-cyan-400 hover:bg-cyan-400/10"
         }`}
       >
         EARTH
@@ -19,7 +19,7 @@ export function ViewToggle() {
       <button
         onClick={() => setView("heliocentric")}
         className={`px-2 py-1 text-xs font-bold transition-colors ${
-          view === "heliocentric" ? "bg-amber text-black" : "text-amber hover:bg-amber/10"
+          view === "heliocentric" ? "bg-cyan-400 text-black" : "text-cyan-400 hover:bg-cyan-400/10"
         }`}
       >
         SYSTEM

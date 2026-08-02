@@ -10,6 +10,8 @@ export interface LayerState {
   neos: boolean;
   spacecraft: boolean;
   solarWind: boolean;
+  satelliteMonitor: boolean;
+  cosmicDashboard: boolean;
 }
 
 export interface TacticalState {
@@ -39,6 +41,8 @@ export const useTacticalStore = create<TacticalState>((set) => ({
     neos: true,
     spacecraft: true,
     solarWind: true,
+    satelliteMonitor: true,
+    cosmicDashboard: true,
   },
   maxMissDistanceAu: 0.05,
   minDiameterM: 0,

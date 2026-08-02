@@ -24,12 +24,12 @@ const EARTH_RADIUS_KM = 6371;
 const SCALE = 1 / 7000;
 
 const GROUP_COLOR: Record<string, number[]> = {
-  starlink: [1, 0.69, 0],
-  "gps-ops": [0, 0.9, 1],
-  active: [0.65, 0.65, 0.65],
-  weather: [0.3, 0.85, 0.5],
-  science: [0.75, 0.52, 0.99],
-  stations: [1, 1, 1],
+  starlink: [0, 1, 1], // Neon cyan
+  "gps-ops": [1, 0, 1], // Neon magenta
+  active: [0.6, 0.6, 0.6],
+  weather: [0, 1, 0.5], // Neon green
+  science: [0.6, 0.2, 1], // Neon purple
+  stations: [1, 0, 0.5], // Neon pink
 };
 
 function propagateSimple(sat: TleDto, now: Date): THREE.Vector3 | null {
@@ -126,7 +126,7 @@ export function SatelliteSwarm() {
       {issPos && (
         <mesh position={issPos}>
           <sphereGeometry args={[0.07, 16, 16]} />
-          <meshBasicMaterial color="#00e5ff" toneMapped={false} />
+          <meshBasicMaterial color="#00ffff" toneMapped={false} />
         </mesh>
       )}
     </group>
