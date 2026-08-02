@@ -8,7 +8,7 @@ A retrofuturist WebGL tracker for asteroids, satellites, spacecraft and solar we
 - **NEO Monitoring**: Track near-Earth objects and potential threats
 - **Cosmic Dashboard**: Explore imagery of solar system, galaxies, supernovas, and the observable universe
 - **3D Virtual Exploration**: Immersive 3D visualization of cosmic scales
-- **Space Weather**: Real-time solar wind and space weather data
+- **Space Weather**: Real-time solar wind and space weather data 
 - **Neon Retrofuturistic Interface**: Cyberpunk-inspired CRT display aesthetics
 
 ## Tech Stack
